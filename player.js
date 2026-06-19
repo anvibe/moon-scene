@@ -68,6 +68,7 @@ let cameraInfo = null;
 const objectById = new Map();
 const sceneObjectById = new Map();
 const mixers = []; // AnimationMixer for each GLB that has clips
+let shadowLightCount = 0; // only 1 directional light gets shadows to stay within texture unit limit
 
 function placeholderMesh(color) {
   const mesh = new THREE.Mesh(
@@ -91,8 +92,7 @@ function downgradeMaterial(mat) {
     normalScale: mat.normalScale,
     roughnessMap: mat.roughnessMap,
     metalnessMap: mat.metalnessMap,
-    aoMap: mat.aoMap,
-    aoMapIntensity: mat.aoMapIntensity,
+    // aoMap and alphaMap dropped to save texture units (budget is tight at 16)
     emissive: mat.emissive,
     emissiveMap: mat.emissiveMap,
     emissiveIntensity: mat.emissiveIntensity,
@@ -100,7 +100,6 @@ function downgradeMaterial(mat) {
     roughness: mat.roughness,
     opacity: mat.opacity,
     transparent: mat.transparent,
-    alphaMap: mat.alphaMap,
     side: mat.side,
     envMapIntensity: mat.envMapIntensity,
   });
@@ -217,24 +216,28 @@ function buildNode(obj, materialRegistry) {
     switch (obj.light) {
       case "directional":
         light = new THREE.DirectionalLight(color, intensity * 1.4);
-        light.castShadow = true;
+        // Only the first directional light casts shadows — each shadow map
+        // consumes a texture unit and we must stay within the 16-unit limit.
+        if (shadowLightCount === 0) {
+          light.castShadow = true;
+          light.shadow.mapSize.set(2048, 2048);
+          light.shadow.camera.near = 0.5;
+          light.shadow.camera.far = 140;
+          light.shadow.camera.left = -50;
+          light.shadow.camera.right = 50;
+          light.shadow.camera.top = 50;
+          light.shadow.camera.bottom = -50;
+          light.shadow.bias = -0.0004;
+          shadowLightCount++;
+        }
         light.position.set(0, 0, 0);
-        light.shadow.mapSize.set(2048, 2048);
-        light.shadow.camera.near = 0.5;
-        light.shadow.camera.far = 140;
-        light.shadow.camera.left = -50;
-        light.shadow.camera.right = 50;
-        light.shadow.camera.top = 50;
-        light.shadow.camera.bottom = -50;
-        light.shadow.bias = -0.0004;
         break;
       case "point":
+        // Point light shadows cost 6 texture units (cube map) — never cast shadows
         light = new THREE.PointLight(color, intensity * 8, 30);
-        light.castShadow = true;
         break;
       case "spot":
         light = new THREE.SpotLight(color, intensity * 10, 0, 0.5, 0.4);
-        light.castShadow = true;
         break;
       case "ambient":
         light = new THREE.AmbientLight(color, intensity);
