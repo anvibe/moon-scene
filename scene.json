@@ -3484,5 +3484,22 @@
       "metalness": 0,
       "roughness": 0
     }
+  },
+  "renderSettings": {
+    "preset": "balanced",
+    "ssao": true,
+    "ssaoIntensity": 3,
+    "bloom": true,
+    "bloomIntensity": 0.8,
+    "vignette": true,
+    "vignetteStrength": 0.55,
+    "saturation": 0,
+    "exposure": 0,
+    "contrast": 0,
+    "brightness": 0,
+    "dof": false,
+    "dofFocusDistance": 5,
+    "dofFocalLength": 2,
+    "dofBokehScale": 3
   }
 }

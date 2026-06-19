@@ -47,8 +47,6 @@ function makeGeometry(type) {
   }
 }
 
-// glb/gltf are loaded directly; blob/data URLs (bundled or drag-in uploads)
-// are GLB too. Anything else falls back to the placeholder volume.
 function isLoadableModel(url) {
   if (!url) return false;
   return /\.(glb|gltf)(\?.*)?$/i.test(url) || url.startsWith("blob:") || url.startsWith("data:");
@@ -63,14 +61,13 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
 // ---------------------------------------------------------------------------
-// Scene graph (ported from src/components/viewport/SceneNode.tsx)
+// Scene graph
 // ---------------------------------------------------------------------------
 
-// Set while walking the scene to the transform/lens of the first object that
-// carries a Camera component, so the initial view matches the authored camera.
 let cameraInfo = null;
 const objectById = new Map();
 const sceneObjectById = new Map();
+const mixers = []; // AnimationMixer for each GLB that has clips
 
 function placeholderMesh(color) {
   const mesh = new THREE.Mesh(
@@ -119,8 +116,6 @@ function buildNode(obj, materialRegistry) {
 
   const color = obj.color ?? "#d4d4d8";
 
-  // The first object carrying a Camera component drives the initial view,
-  // mirroring findCameraObject() / play-mode camera setup in the editor.
   const camCfg = obj.components?.find((c) => c.type === "Camera")?.config;
   if (camCfg && !cameraInfo) {
     cameraInfo = {
@@ -161,10 +156,17 @@ function buildNode(obj, materialRegistry) {
           applyMaterialOverride(model, obj.materialId, materialRegistry);
           group.remove(placeholder);
           group.add(model);
+
+          // Play all animations if the GLB has any
+          if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+            mixers.push(mixer);
+          }
         },
         undefined,
         () => {
-          // Keep the placeholder volume on load failure (404 / CORS / decode).
+          // Keep placeholder on load failure
         }
       );
     }
@@ -288,6 +290,7 @@ async function main() {
   const data = await res.json();
   const sceneData = data.scene;
   const materialRegistry = data.materialRegistry ?? {};
+  const renderSettings = data.renderSettings ?? {};
   const env = sceneData.environment ?? {};
 
   document.title = sceneData.name || "Gizmo Scene";
@@ -297,6 +300,11 @@ async function main() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // Match the editor's tone mapping and exposure
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = Math.pow(2, renderSettings.exposure ?? 0);
+
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -450,6 +458,10 @@ async function main() {
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
+
+    // Tick all GLB animation mixers
+    for (const mixer of mixers) mixer.update(dt);
+
     if (playerIsCamera && playerNode) {
       camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, "YXZ"));
       const speed = ((getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt);
