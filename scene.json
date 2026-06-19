@@ -1,0 +1,3488 @@
+{
+  "scene": {
+    "id": "scene_mqkpr7ah2jppfi",
+    "name": "Moon Scene",
+    "environment": {
+      "background": "#04040f",
+      "fog": true,
+      "ambientIntensity": 1.4,
+      "hdri": "night",
+      "hdriIntensity": 0.7,
+      "hdriRotation": 120,
+      "showHdriBackground": false,
+      "fogColor": "#0a0a1f",
+      "fogDensity": 0.009
+    },
+    "objects": [
+      {
+        "id": "obj_mqkpr7ah2ci4eu",
+        "name": "Moon Scene",
+        "type": "group",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpr7ah2b08wl",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          }
+        ],
+        "children": [
+          {
+            "id": "obj_mqkpr7ah2exoyn",
+            "name": "Environment",
+            "type": "group",
+            "transform": {
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkpr7ah2d5c2g",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              }
+            ],
+            "children": [
+              {
+                "id": "obj_mqkpr7ah3vxvw",
+                "name": "Moon Surface",
+                "type": "mesh",
+                "primitive": "plane",
+                "color": "#9b9a97",
+                "transform": {
+                  "position": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    3,
+                    1,
+                    3
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1pr2z",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah2xvxm",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": false,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah6fmzd",
+                "name": "Sun",
+                "type": "light",
+                "light": "directional",
+                "color": "#fffdf5",
+                "transform": {
+                  "position": [
+                    25,
+                    30,
+                    15
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1,
+                    1,
+                    1
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah41q33",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah5se7z",
+                    "type": "Light",
+                    "enabled": true,
+                    "config": {
+                      "intensity": 0.1,
+                      "kind": "directional",
+                      "width": 4,
+                      "height": 2
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah9eowk",
+                "name": "Earthshine",
+                "type": "light",
+                "light": "point",
+                "color": "#9db8ff",
+                "transform": {
+                  "position": [
+                    -12,
+                    8,
+                    -16
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1,
+                    1,
+                    1
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah7a54y",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah8vmh4",
+                    "type": "Light",
+                    "enabled": true,
+                    "config": {
+                      "intensity": 0.3,
+                      "kind": "point",
+                      "width": 4,
+                      "height": 2
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahc1s6v",
+                "name": "Earth",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#2f6fb3",
+                "transform": {
+                  "position": [
+                    -18,
+                    16,
+                    -28
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    4,
+                    4,
+                    4
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7aha9x5f",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahb66ea",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahf00qo",
+                "name": "Camera",
+                "type": "camera",
+                "transform": {
+                  "position": [
+                    1.76,
+                    1.37,
+                    9.41
+                  ],
+                  "rotation": [
+                    -4.19,
+                    2.7,
+                    0.2
+                  ],
+                  "scale": [
+                    1,
+                    1,
+                    1
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahdyw49",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahea2l5",
+                    "type": "Camera",
+                    "enabled": true,
+                    "config": {
+                      "fov": 60,
+                      "near": 0.1,
+                      "far": 1000
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              }
+            ],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkpr7ah2gp2h9",
+            "name": "Terrain",
+            "type": "group",
+            "transform": {
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkpr7ah2frg19",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              }
+            ],
+            "children": [
+              {
+                "id": "obj_mqkpr7ahiz1so",
+                "name": "Crater 1",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    -6,
+                    0.06,
+                    -3
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    3.5,
+                    3.5,
+                    0.4
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahgr9u7",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahhpzd3",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahltrvf",
+                "name": "Crater 2",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    7,
+                    0.06,
+                    4
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    2.6,
+                    2.6,
+                    0.4
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahjg9l2",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahk73cb",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahowjei",
+                "name": "Crater 3",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    2,
+                    0.06,
+                    -8
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    4.5,
+                    4.5,
+                    0.5
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahmxzs5",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahngxck",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahr0xjb",
+                "name": "Crater 4",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    -9,
+                    0.06,
+                    6
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    2,
+                    2,
+                    0.35
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahp4hrq",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahq7wyl",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahu8b36",
+                "name": "Crater 5",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    10,
+                    0.06,
+                    -7
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    3,
+                    3,
+                    0.4
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahsdql6",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7aht3q39",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ahxe8pd",
+                "name": "Crater 6",
+                "type": "mesh",
+                "primitive": "torus",
+                "color": "#5f5e5b",
+                "transform": {
+                  "position": [
+                    -2,
+                    0.06,
+                    9
+                  ],
+                  "rotation": [
+                    90,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    2.2,
+                    2.2,
+                    0.35
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahvghef",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahww2dt",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah108mbn",
+                "name": "Rock 1",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#7c7b78",
+                "transform": {
+                  "position": [
+                    4,
+                    0.35,
+                    1
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.7,
+                    0.595,
+                    0.7
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ahyh3a1",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ahzg3hz",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah13ukvw",
+                "name": "Rock 2",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#6e6d6a",
+                "transform": {
+                  "position": [
+                    -3,
+                    0.45,
+                    3
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.9,
+                    0.765,
+                    0.9
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah11tx7x",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah12plr9",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah16ikj9",
+                "name": "Rock 3",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#86857f",
+                "transform": {
+                  "position": [
+                    6,
+                    0.3,
+                    -2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.55,
+                    0.4675,
+                    0.55
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah14cwz7",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah15y31u",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah19w2ia",
+                "name": "Rock 4",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#73726e",
+                "transform": {
+                  "position": [
+                    -7,
+                    0.6,
+                    -6
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1.3,
+                    1.105,
+                    1.3
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah17z3e0",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah18rkz6",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1c6rer",
+                "name": "Rock 5",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#807f7a",
+                "transform": {
+                  "position": [
+                    9,
+                    0.5,
+                    6
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1,
+                    0.85,
+                    1
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1a9zyd",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1b5x7f",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1fgtcy",
+                "name": "Rock 6",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#6b6a67",
+                "transform": {
+                  "position": [
+                    -10,
+                    0.4,
+                    -1
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.8,
+                    0.68,
+                    0.8
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1dkx9q",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1ezdwe",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1ibik7",
+                "name": "Rock 7",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#8b8a85",
+                "transform": {
+                  "position": [
+                    1,
+                    0.25,
+                    5
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.45,
+                    0.3825,
+                    0.45
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1gxk54",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1h4y05",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1l3bxx",
+                "name": "Rock 8",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#6f6e6a",
+                "transform": {
+                  "position": [
+                    12,
+                    0.7,
+                    2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1.5,
+                    1.275,
+                    1.5
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1j981w",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1kbyw0",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1owjq7",
+                "name": "Pebble 1",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#888782",
+                "transform": {
+                  "position": [
+                    2.2,
+                    0.15,
+                    1.8
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.28,
+                    0.22,
+                    0.28
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1m5gm4",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1n7pvf",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1r7xtk",
+                "name": "Pebble 2",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#888782",
+                "transform": {
+                  "position": [
+                    -1.5,
+                    0.15,
+                    2.2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.28,
+                    0.22,
+                    0.28
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1pz10s",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1q884s",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1ur49q",
+                "name": "Pebble 3",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#888782",
+                "transform": {
+                  "position": [
+                    3.5,
+                    0.15,
+                    -1.2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.28,
+                    0.22,
+                    0.28
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1sdmxr",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1tdp19",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah1xghms",
+                "name": "Pebble 4",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#888782",
+                "transform": {
+                  "position": [
+                    -4.2,
+                    0.15,
+                    0.5
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.28,
+                    0.22,
+                    0.28
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1vc64p",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1weyh1",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah20bbqg",
+                "name": "Pebble 5",
+                "type": "mesh",
+                "primitive": "sphere",
+                "color": "#888782",
+                "transform": {
+                  "position": [
+                    5.5,
+                    0.15,
+                    3.2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.28,
+                    0.22,
+                    0.28
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah1ybved",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah1zyfsj",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              }
+            ],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkpr7ah2io0f2",
+            "name": "Mission",
+            "type": "group",
+            "transform": {
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkpr7ah2h2mji",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              }
+            ],
+            "children": [
+              {
+                "id": "obj_mqkpr7ah29j8ad",
+                "name": "Astronaut",
+                "type": "model",
+                "color": "#cbd5e1",
+                "assetUrl": "assets/obj_mqkpr7ah29j8ad.glb",
+                "assetId": "a_astronaut",
+                "transform": {
+                  "position": [
+                    0,
+                    -0.02,
+                    1.5
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    1,
+                    1,
+                    1
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah2759xj",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah28depj",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah2a04bi",
+                    "type": "PlayerController",
+                    "enabled": true,
+                    "config": {
+                      "speed": 6,
+                      "jumpForce": 8,
+                      "control": "wasd"
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkpz4lc22xlcl",
+                    "type": "PlayerController",
+                    "enabled": true,
+                    "config": {
+                      "speed": 6,
+                      "jumpForce": 8,
+                      "control": "wasd"
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkpz4lc23dyfv",
+                    "type": "Collider",
+                    "enabled": true,
+                    "config": {
+                      "shape": "box",
+                      "isTrigger": false
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkqkdtu3s6mv8",
+                    "type": "Rigidbody",
+                    "enabled": true,
+                    "config": {
+                      "mass": 1,
+                      "gravity": true,
+                      "kinematic": false
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkrnkwp1rel4l",
+                    "type": "PlayerController",
+                    "enabled": true,
+                    "config": {
+                      "speed": 6,
+                      "jumpForce": 8,
+                      "control": "wasd"
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkrnn6b1ti8dj",
+                    "type": "Collider",
+                    "enabled": true,
+                    "config": {
+                      "shape": "box",
+                      "isTrigger": false
+                    }
+                  },
+                  {
+                    "id": "cmp_mqkrnn6c1u3p2l",
+                    "type": "Rigidbody",
+                    "enabled": true,
+                    "config": {
+                      "mass": 1,
+                      "gravity": true,
+                      "kinematic": false
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah2359hk",
+                "name": "Flag Pole",
+                "type": "mesh",
+                "primitive": "cylinder",
+                "color": "#dfe3e6",
+                "transform": {
+                  "position": [
+                    3.2,
+                    1,
+                    2.2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.05,
+                    2,
+                    0.05
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah21n10d",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah22p1vh",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              },
+              {
+                "id": "obj_mqkpr7ah26lj04",
+                "name": "Flag",
+                "type": "mesh",
+                "primitive": "cube",
+                "color": "#c0392b",
+                "transform": {
+                  "position": [
+                    3.62,
+                    1.75,
+                    2.2
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "scale": [
+                    0.7,
+                    0.45,
+                    0.04
+                  ]
+                },
+                "components": [
+                  {
+                    "id": "cmp_mqkpr7ah24m0px",
+                    "type": "Transform",
+                    "enabled": true,
+                    "config": {}
+                  },
+                  {
+                    "id": "cmp_mqkpr7ah25uafv",
+                    "type": "MeshRenderer",
+                    "enabled": true,
+                    "config": {
+                      "castShadow": true,
+                      "receiveShadow": true,
+                      "material": "Default"
+                    }
+                  }
+                ],
+                "children": [],
+                "visible": true,
+                "expanded": true
+              }
+            ],
+            "visible": true,
+            "expanded": true
+          }
+        ],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpz4lb1v9v6k",
+        "name": "Base Light",
+        "type": "light",
+        "light": "point",
+        "color": "#fff5e0",
+        "transform": {
+          "position": [
+            0,
+            6,
+            2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpz4lb1tyb4f",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpz4lb1u7y0g",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "point",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpz4lb1yx322",
+        "name": "Fill Ambient",
+        "type": "light",
+        "light": "ambient",
+        "color": "#3a4a6b",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpz4lb1wardx",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpz4lb1x347h",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 0,
+              "kind": "ambient",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpz4lb21726s",
+        "name": "Rim Light",
+        "type": "light",
+        "light": "spot",
+        "color": "#bcd2ff",
+        "transform": {
+          "position": [
+            -10,
+            10,
+            8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpz4lb1zf6i0",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpz4lb20hzei",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 0,
+              "kind": "spot",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpz4lc25536g",
+        "name": "ScoreKeeper",
+        "type": "empty",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpz4lc24i18i",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpz4lc26ir32",
+            "type": "ScoreManager",
+            "enabled": true,
+            "config": {
+              "startScore": 0
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda12a1zii",
+        "name": "Crystal 1",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#34e0eb",
+        "transform": {
+          "position": [
+            5,
+            0.6,
+            -4
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda128b2nk",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda129mczh",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn162rfdoj",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 10,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnpap1x3kc0",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda12d929u",
+        "name": "Crystal 2",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#34e0eb",
+        "transform": {
+          "position": [
+            -7,
+            0.6,
+            2
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda12b5s4t",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda12c8v2p",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn172sfqfy",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 10,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnpap1yon1w",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda12gis0e",
+        "name": "Crystal 3",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#a855f7",
+        "transform": {
+          "position": [
+            3,
+            0.6,
+            7
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda12el4ll",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda12frsdq",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn172ttqrq",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 25,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnrc220o0ld",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda12jrup3",
+        "name": "Crystal 4",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#a855f7",
+        "transform": {
+          "position": [
+            -4,
+            0.6,
+            -7
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda12hxsxe",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda12iqm9i",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn172uqqso",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 25,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnrc321p5cz",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda22meies",
+        "name": "Crystal 5",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#facc15",
+        "transform": {
+          "position": [
+            9,
+            0.6,
+            3
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda22kdd6i",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda22ljs5f",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn172vbnuy",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 50,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnrc322n4mv",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkpzda22pftcq",
+        "name": "Crystal 6",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#facc15",
+        "transform": {
+          "position": [
+            -9,
+            0.6,
+            -3
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            0.9,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkpzda22nz5vn",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkpzda22osrd9",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkpzn172wq9w2",
+            "type": "Collectible",
+            "enabled": true,
+            "config": {
+              "points": 50,
+              "respawn": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnstx23n2ro",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqji8x1upqok",
+        "name": "Moon Ground",
+        "type": "mesh",
+        "primitive": "plane",
+        "color": "#1a1a2e",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            80,
+            1,
+            80
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqji8x1scqb6",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqji8x1ta2y7",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjnq41y6gh8",
+        "name": "Key Light",
+        "type": "light",
+        "light": "directional",
+        "color": "#fff0cc",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            -38,
+            50,
+            0
+          ],
+          "scale": [
+            1.3,
+            1.3,
+            1.3
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjnq41wxlb5",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjnq41x9s56",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "directional",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjnq421k41c",
+        "name": "Fill Light",
+        "type": "light",
+        "light": "directional",
+        "color": "#6080ff",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            -12,
+            -125,
+            0
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjnq41znjof",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjnq42028dw",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "directional",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjnq524ykd1",
+        "name": "Rim Light",
+        "type": "light",
+        "light": "directional",
+        "color": "#ffffff",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            18,
+            168,
+            0
+          ],
+          "scale": [
+            0.2,
+            0.2,
+            0.2
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjnq5228wpj",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjnq523nfmj",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "directional",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjnq527uni5",
+        "name": "Crystal Glow Light",
+        "type": "light",
+        "light": "point",
+        "color": "#22d3ee",
+        "transform": {
+          "position": [
+            0,
+            3,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.5,
+            1.5,
+            1.5
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjnq525nq0e",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjnq52615vd",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "point",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjtmr2bqc5x",
+        "name": "Crystal Pillar 1",
+        "type": "mesh",
+        "primitive": "cube",
+        "color": "#22d3ee",
+        "transform": {
+          "position": [
+            -14,
+            2,
+            -18
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            4,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjtmr29z7as",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjtmr2adgm5",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjtms2e07hz",
+        "name": "Crystal Pillar 2",
+        "type": "mesh",
+        "primitive": "cube",
+        "color": "#22d3ee",
+        "transform": {
+          "position": [
+            0,
+            2,
+            -22
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            4,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjtms2csn97",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjtms2dck17",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjtms2hc5vd",
+        "name": "Crystal Pillar 3",
+        "type": "mesh",
+        "primitive": "cube",
+        "color": "#22d3ee",
+        "transform": {
+          "position": [
+            12,
+            2,
+            -20
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.4,
+            4,
+            0.4
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjtms2fnbx7",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqjtms2gsbcu",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqjtms2j2vas",
+        "name": "Space Station Group",
+        "type": "group",
+        "transform": {
+          "position": [
+            0,
+            0,
+            -30
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqjtms2i1u5m",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          }
+        ],
+        "children": [
+          {
+            "id": "obj_mqkqk0fm2nyc50",
+            "name": "Station Core",
+            "type": "mesh",
+            "primitive": "cube",
+            "color": "#0d1117",
+            "transform": {
+              "position": [
+                0,
+                4,
+                -30
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                6,
+                3,
+                2
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkqk0fm2l2oag",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              },
+              {
+                "id": "cmp_mqkqk0fm2mybd4",
+                "type": "MeshRenderer",
+                "enabled": true,
+                "config": {
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": "Default"
+                }
+              }
+            ],
+            "children": [],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkqk0fm2q6ahp",
+            "name": "Station Wing Left",
+            "type": "mesh",
+            "primitive": "cube",
+            "color": "#0d1117",
+            "transform": {
+              "position": [
+                -7,
+                4,
+                -30
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                5,
+                1,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkqk0fm2oku5d",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              },
+              {
+                "id": "cmp_mqkqk0fm2pkgmf",
+                "type": "MeshRenderer",
+                "enabled": true,
+                "config": {
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": "Default"
+                }
+              }
+            ],
+            "children": [],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkqk0fm2tx3cl",
+            "name": "Station Wing Right",
+            "type": "mesh",
+            "primitive": "cube",
+            "color": "#0d1117",
+            "transform": {
+              "position": [
+                7,
+                4,
+                -30
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                5,
+                1,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkqk0fm2rqa56",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              },
+              {
+                "id": "cmp_mqkqk0fm2s4lm2",
+                "type": "MeshRenderer",
+                "enabled": true,
+                "config": {
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": "Default"
+                }
+              }
+            ],
+            "children": [],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkqk0fm2w4qko",
+            "name": "Station Tower",
+            "type": "mesh",
+            "primitive": "cube",
+            "color": "#0d1117",
+            "transform": {
+              "position": [
+                0,
+                7,
+                -30
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1,
+                3,
+                1
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkqk0fm2unpg4",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              },
+              {
+                "id": "cmp_mqkqk0fm2vi0as",
+                "type": "MeshRenderer",
+                "enabled": true,
+                "config": {
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": "Default"
+                }
+              }
+            ],
+            "children": [],
+            "visible": true,
+            "expanded": true
+          },
+          {
+            "id": "obj_mqkqk0fm2zqlp0",
+            "name": "Station Dish",
+            "type": "mesh",
+            "primitive": "cylinder",
+            "color": "#111827",
+            "transform": {
+              "position": [
+                3,
+                6,
+                -30
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "scale": [
+                1.5,
+                0.15,
+                1.5
+              ]
+            },
+            "components": [
+              {
+                "id": "cmp_mqkqk0fm2xvz7y",
+                "type": "Transform",
+                "enabled": true,
+                "config": {}
+              },
+              {
+                "id": "cmp_mqkqk0fm2yj1bt",
+                "type": "MeshRenderer",
+                "enabled": true,
+                "config": {
+                  "castShadow": true,
+                  "receiveShadow": true,
+                  "material": "Default"
+                }
+              }
+            ],
+            "children": [],
+            "visible": true,
+            "expanded": true
+          }
+        ],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9v33sgcg",
+        "name": "Rock A",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#2a2a3a",
+        "transform": {
+          "position": [
+            11,
+            0.5,
+            -5
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.2,
+            0.9,
+            1.1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9v31s57a",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9v327mww",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9w360eua",
+        "name": "Rock B",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#2a2a3a",
+        "transform": {
+          "position": [
+            -13,
+            0.7,
+            4
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.8,
+            1.3,
+            1.6
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9w34b9gl",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9w35r813",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9w39osil",
+        "name": "Rock C",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#2a2a3a",
+        "transform": {
+          "position": [
+            5,
+            0.4,
+            -13
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.9,
+            0.65,
+            0.85
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9w37nd9q",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9w38rr1s",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9w3chsu0",
+        "name": "Rock D",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#2a2a3a",
+        "transform": {
+          "position": [
+            -8,
+            0.6,
+            -11
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.4,
+            1,
+            1.2
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9w3a1xqt",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9w3bawha",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9w3fq2wg",
+        "name": "Rock E",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#2a2a3a",
+        "transform": {
+          "position": [
+            14,
+            0.5,
+            8
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.7,
+            0.5,
+            0.7
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9w3ds98p",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9w3eqk0f",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9x3iudvy",
+        "name": "Drone 1",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#ef4444",
+        "transform": {
+          "position": [
+            8,
+            2,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.6,
+            0.3,
+            0.6
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9x3g3ww0",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9x3hl3td",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkqkdtt3qz2wg",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnn6c1v87r4",
+            "type": "EnemyAI",
+            "enabled": true,
+            "config": {
+              "behavior": "chase",
+              "speed": 3,
+              "detectionRange": 12
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9x3lhcwg",
+        "name": "Drone 2",
+        "type": "mesh",
+        "primitive": "sphere",
+        "color": "#ef4444",
+        "transform": {
+          "position": [
+            12,
+            3.5,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.6,
+            0.3,
+            0.6
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9x3j7j7f",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9x3k3vab",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          },
+          {
+            "id": "cmp_mqkqkdtt3rstkw",
+            "type": "Collider",
+            "enabled": true,
+            "config": {
+              "shape": "box",
+              "isTrigger": false
+            }
+          },
+          {
+            "id": "cmp_mqkrnpao1wqgfa",
+            "type": "EnemyAI",
+            "enabled": true,
+            "config": {
+              "behavior": "chase",
+              "speed": 3,
+              "detectionRange": 12
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqka9x3oy4ek",
+        "name": "Main Camera",
+        "type": "camera",
+        "transform": {
+          "position": [
+            2.68,
+            1.37,
+            8.09
+          ],
+          "rotation": [
+            -5.1,
+            18.9,
+            1.66
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqka9x3mmuvk",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqka9x3n7xer",
+            "type": "Camera",
+            "enabled": true,
+            "config": {
+              "fov": 60,
+              "near": 0.1,
+              "far": 1000
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy53zd1zi",
+        "name": "Crystal 1",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#22d3ee",
+        "transform": {
+          "position": [
+            6,
+            0.9,
+            -5
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy53xrc2d",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy53y7vdz",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy642irat",
+        "name": "Crystal 2",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#f472b6",
+        "transform": {
+          "position": [
+            -8,
+            1.4,
+            3
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy6408zk9",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy6411j0v",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy645gtk8",
+        "name": "Crystal 3",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#a855f7",
+        "transform": {
+          "position": [
+            3,
+            1.8,
+            9
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy6433cqy",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy644vs89",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy648q3lx",
+        "name": "Crystal 4",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#facc15",
+        "transform": {
+          "position": [
+            -5,
+            0.6,
+            -9
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy6468gqe",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy647tzat",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy64bnjt2",
+        "name": "Crystal 5",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#4ade80",
+        "transform": {
+          "position": [
+            12,
+            2.2,
+            -4
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy649pmp8",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy64azecj",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkqkvy74egs5k",
+        "name": "Crystal 6",
+        "type": "mesh",
+        "primitive": "cone",
+        "color": "#fb923c",
+        "transform": {
+          "position": [
+            -11,
+            1.1,
+            -6
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            0.35,
+            0.55,
+            0.35
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkqkvy74czpnq",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkqkvy74dnrlt",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkroasj2bknpy",
+        "name": "Main Camera",
+        "type": "camera",
+        "transform": {
+          "position": [
+            0,
+            5,
+            7
+          ],
+          "rotation": [
+            -22,
+            180,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkroasj29hu7h",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkroasj2a0s5h",
+            "type": "Camera",
+            "enabled": true,
+            "config": {
+              "fov": 60,
+              "near": 0.1,
+              "far": 1000
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkroask2ecw4j",
+        "name": "Key Light",
+        "type": "light",
+        "light": "directional",
+        "color": "#fff0cc",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            -38,
+            50,
+            0
+          ],
+          "scale": [
+            1.3,
+            1.3,
+            1.3
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkroask2cj3kg",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkroask2dz8kf",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "directional",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkroask2h8392",
+        "name": "Fill Light",
+        "type": "light",
+        "light": "directional",
+        "color": "#6080ff",
+        "transform": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            -12,
+            -125,
+            0
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkroask2frts9",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkroask2gmoao",
+            "type": "Light",
+            "enabled": true,
+            "config": {
+              "intensity": 1,
+              "kind": "directional",
+              "width": 4,
+              "height": 2
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      },
+      {
+        "id": "obj_mqkuf4jw1qjlis",
+        "name": "Toy_Car",
+        "type": "model",
+        "color": "#e74c3c",
+        "assetUrl": "assets/obj_mqkuf4jw1qjlis.glb",
+        "assetId": "a_car",
+        "transform": {
+          "position": [
+            0,
+            0.5,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "components": [
+          {
+            "id": "cmp_mqkuf4jw1o1etl",
+            "type": "Transform",
+            "enabled": true,
+            "config": {}
+          },
+          {
+            "id": "cmp_mqkuf4jw1p4x3o",
+            "type": "MeshRenderer",
+            "enabled": true,
+            "config": {
+              "castShadow": true,
+              "receiveShadow": true,
+              "material": "Default"
+            }
+          }
+        ],
+        "children": [],
+        "visible": true,
+        "expanded": true
+      }
+    ]
+  },
+  "materialRegistry": {
+    "a_astronaut_Astronaut_mat": {
+      "color": "#bcbcbc",
+      "metalness": 0,
+      "roughness": 0.9699476628648295
+    },
+    "a_car_ToyCar": {
+      "color": "#ffffff",
+      "metalness": 1,
+      "roughness": 1
+    },
+    "a_car_Fabric": {
+      "color": "#6c6c6c",
+      "metalness": 0,
+      "roughness": 1
+    },
+    "a_car_Glass": {
+      "color": "#95e795",
+      "metalness": 0,
+      "roughness": 0
+    }
+  }
+}
