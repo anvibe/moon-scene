@@ -3,47 +3,46 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const D2R = Math.PI / 180;
 
+// Three.js r155+ uses physical light units. Scale up to match legacy editor values.
+const L = Math.PI;
+
 // ---------------------------------------------------------------------------
-// Materials (ported from src/lib/materials.ts)
+// Materials
 // ---------------------------------------------------------------------------
 const MATERIAL_PRESETS = {
   m_carpaint: { color: "#e74c3c", metalness: 0.6, roughness: 0.28 },
-  m_asphalt: { color: "#3f3f46", metalness: 0.0, roughness: 0.95 },
-  m_regolith: { color: "#9b9a97", metalness: 0.0, roughness: 1.0 },
+  m_asphalt:  { color: "#3f3f46", metalness: 0.0, roughness: 0.95 },
+  m_regolith: { color: "#9b9a97", metalness: 0.0, roughness: 1.0  },
   m_moonrock: { color: "#6e6d6a", metalness: 0.05, roughness: 0.9 },
-  m_metal: { color: "#b8c0c8", metalness: 0.9, roughness: 0.32 },
+  m_metal:    { color: "#b8c0c8", metalness: 0.9, roughness: 0.32 },
 };
 
 function materialProps(materialId, registry) {
   if (!materialId) return null;
-  if (registry && registry[materialId]) return registry[materialId];
+  if (registry?.[materialId]) return registry[materialId];
   if (MATERIAL_PRESETS[materialId]) return MATERIAL_PRESETS[materialId];
   return null;
 }
 
 // ---------------------------------------------------------------------------
-// Geometry (ported from src/components/viewport/geometry.tsx)
+// Geometry
 // ---------------------------------------------------------------------------
 function makeGeometry(type) {
   switch (type) {
-    case "sphere":
-      return new THREE.SphereGeometry(0.6, 32, 32);
-    case "plane":
-      return new THREE.BoxGeometry(20, 0.05, 20);
-    case "cylinder":
-      return new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
-    case "cone":
-      return new THREE.ConeGeometry(0.6, 1.2, 32);
-    case "torus":
-      return new THREE.TorusGeometry(0.6, 0.18, 16, 48);
-    case "capsule":
-      return new THREE.CapsuleGeometry(0.4, 0.8, 8, 16);
-    case "cube":
-    default:
-      return new THREE.BoxGeometry(1, 1, 1);
+    case "sphere":   return new THREE.SphereGeometry(0.6, 32, 32);
+    case "plane":    return new THREE.BoxGeometry(20, 0.05, 20);
+    case "cylinder": return new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+    case "cone":     return new THREE.ConeGeometry(0.6, 1.2, 32);
+    case "torus":    return new THREE.TorusGeometry(0.6, 0.18, 16, 48);
+    case "capsule":  return new THREE.CapsuleGeometry(0.4, 0.8, 8, 16);
+    default:         return new THREE.BoxGeometry(1, 1, 1);
   }
 }
 
@@ -61,30 +60,11 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
 // ---------------------------------------------------------------------------
-// Scene graph
+// Material downgrade: MeshPhysicalMaterial → MeshStandardMaterial
+// Physical materials can use 20+ texture units, exceeding the WebGL limit of 16.
 // ---------------------------------------------------------------------------
-
-let cameraInfo = null;
-const objectById = new Map();
-const sceneObjectById = new Map();
-const mixers = []; // AnimationMixer for each GLB that has clips
-let shadowLightCount = 0; // only 1 directional light gets shadows to stay within texture unit limit
-
-function placeholderMesh(color) {
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.2, 1.2, 1.2),
-    new THREE.MeshStandardMaterial({ color: color ?? "#d4d4d8", metalness: 0.4, roughness: 0.4 })
-  );
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
-// Downgrade MeshPhysicalMaterial → MeshStandardMaterial to stay within
-// WebGL's MAX_TEXTURE_IMAGE_UNITS=16 limit. Physical materials with
-// clearcoat/iridescence/transmission/sheen maps can require 20+ samplers.
 function downgradeMaterial(mat) {
-  if (!(mat && mat.isMeshPhysicalMaterial)) return mat;
+  if (!mat?.isMeshPhysicalMaterial) return mat;
   const std = new THREE.MeshStandardMaterial({
     color: mat.color,
     map: mat.map,
@@ -92,7 +72,6 @@ function downgradeMaterial(mat) {
     normalScale: mat.normalScale,
     roughnessMap: mat.roughnessMap,
     metalnessMap: mat.metalnessMap,
-    // aoMap and alphaMap dropped to save texture units (budget is tight at 16)
     emissive: mat.emissive,
     emissiveMap: mat.emissiveMap,
     emissiveIntensity: mat.emissiveIntensity,
@@ -110,11 +89,9 @@ function downgradeMaterial(mat) {
 function downgradeMaterials(root) {
   root.traverse((o) => {
     if (!o.isMesh) return;
-    if (Array.isArray(o.material)) {
-      o.material = o.material.map(downgradeMaterial);
-    } else {
-      o.material = downgradeMaterial(o.material);
-    }
+    o.material = Array.isArray(o.material)
+      ? o.material.map(downgradeMaterial)
+      : downgradeMaterial(o.material);
   });
 }
 
@@ -138,6 +115,25 @@ function applyMaterialOverride(root, materialId, registry) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Scene graph
+// ---------------------------------------------------------------------------
+let cameraInfo = null;
+const objectById = new Map();
+const sceneObjectById = new Map();
+const mixers = [];
+let shadowLightCount = 0; // only 1 directional light gets a shadow map
+
+function placeholderMesh(color) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 1.2, 1.2),
+    new THREE.MeshStandardMaterial({ color: color ?? "#d4d4d8", metalness: 0.4, roughness: 0.4 })
+  );
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
 function buildNode(obj, materialRegistry) {
   if (obj.visible === false) return null;
 
@@ -157,12 +153,7 @@ function buildNode(obj, materialRegistry) {
 
   const camCfg = obj.components?.find((c) => c.type === "Camera")?.config;
   if (camCfg && !cameraInfo) {
-    cameraInfo = {
-      id: obj.id,
-      fov: camCfg.fov ?? 50,
-      near: camCfg.near ?? 0.1,
-      far: camCfg.far ?? 1000,
-    };
+    cameraInfo = { id: obj.id, fov: camCfg.fov ?? 50, near: camCfg.near ?? 0.1, far: camCfg.far ?? 1000 };
   }
 
   if (obj.type === "mesh" && obj.primitive) {
@@ -179,6 +170,7 @@ function buildNode(obj, materialRegistry) {
     mesh.castShadow = !isPlane;
     mesh.receiveShadow = true;
     group.add(mesh);
+
   } else if (obj.type === "model") {
     const placeholder = placeholderMesh(color);
     group.add(placeholder);
@@ -196,28 +188,23 @@ function buildNode(obj, materialRegistry) {
           applyMaterialOverride(model, obj.materialId, materialRegistry);
           group.remove(placeholder);
           group.add(model);
-
-          // Play all animations if the GLB has any
-          if (gltf.animations && gltf.animations.length > 0) {
+          if (gltf.animations?.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
             gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
             mixers.push(mixer);
           }
         },
         undefined,
-        () => {
-          // Keep placeholder on load failure
-        }
+        () => {} // keep placeholder on failure
       );
     }
+
   } else if (obj.type === "light" && obj.light) {
     const intensity = obj.components?.find((c) => c.type === "Light")?.config?.intensity ?? 1;
     let light = null;
     switch (obj.light) {
       case "directional":
-        light = new THREE.DirectionalLight(color, intensity * 1.4);
-        // Only the first directional light casts shadows — each shadow map
-        // consumes a texture unit and we must stay within the 16-unit limit.
+        light = new THREE.DirectionalLight(color, intensity * 1.4 * L);
         if (shadowLightCount === 0) {
           light.castShadow = true;
           light.shadow.mapSize.set(2048, 2048);
@@ -230,17 +217,16 @@ function buildNode(obj, materialRegistry) {
           light.shadow.bias = -0.0004;
           shadowLightCount++;
         }
-        light.position.set(0, 0, 0);
         break;
       case "point":
-        // Point light shadows cost 6 texture units (cube map) — never cast shadows
-        light = new THREE.PointLight(color, intensity * 8, 30);
+        // Point shadows use 6 texture units (cube map) — skip to stay under limit
+        light = new THREE.PointLight(color, intensity * 8 * L, 30);
         break;
       case "spot":
-        light = new THREE.SpotLight(color, intensity * 10, 0, 0.5, 0.4);
+        light = new THREE.SpotLight(color, intensity * 10 * L, 0, 0.5, 0.4);
         break;
       case "ambient":
-        light = new THREE.AmbientLight(color, intensity);
+        light = new THREE.AmbientLight(color, intensity * L);
         break;
     }
     if (light) group.add(light);
@@ -267,10 +253,9 @@ function collectDamageTargets(objects, playerId) {
   const out = [];
   const walk = (list) => {
     for (const obj of list ?? []) {
-      const target =
-        obj.id !== playerId &&
+      const isTarget = obj.id !== playerId &&
         (obj.components?.some((c) => c.type === "Health") || obj.components?.some((c) => c.type === "EnemyAI"));
-      if (target) out.push(obj);
+      if (isTarget) out.push(obj);
       walk(obj.children);
     }
   };
@@ -285,8 +270,8 @@ function getComponent(obj, type) {
 function targetCentroid(targets) {
   const center = new THREE.Vector3();
   let count = 0;
-  for (const target of targets) {
-    const obj = objectById.get(target.id);
+  for (const t of targets) {
+    const obj = objectById.get(t.id);
     if (!obj) continue;
     obj.updateWorldMatrix(true, false);
     center.add(obj.getWorldPosition(new THREE.Vector3()));
@@ -313,7 +298,6 @@ function addOverlay() {
   document.body.appendChild(root);
   return {
     hud: root.querySelector("#hud"),
-    crosshair: root.querySelector("#crosshair"),
     setArmed(armed) {
       root.querySelector("#crosshair").style.display = armed ? "block" : "none";
       root.querySelector("#help").style.display = armed ? "block" : "none";
@@ -334,7 +318,7 @@ async function main() {
   const data = await res.json();
   const sceneData = data.scene;
   const materialRegistry = data.materialRegistry ?? {};
-  const renderSettings = data.renderSettings ?? {};
+  const rs = data.renderSettings ?? {};
   const env = sceneData.environment ?? {};
 
   document.title = sceneData.name || "Gizmo Scene";
@@ -344,26 +328,22 @@ async function main() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-  // Match the editor's tone mapping and exposure
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = Math.pow(2, renderSettings.exposure ?? 0);
-
+  renderer.toneMappingExposure = Math.pow(2, rs.exposure ?? 0);
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(env.background || "#0a0a0a");
-  if (env.fog) {
-    scene.fog = new THREE.Fog(env.background || "#0a0a0a", 24, 60);
-  }
+  if (env.fog) scene.fog = new THREE.Fog(env.background || "#0a0a0a", 24, 60);
 
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.25;
+  scene.environmentIntensity = 1.2;
   pmremGenerator.dispose();
 
-  scene.add(new THREE.AmbientLight(0xffffff, env.ambientIntensity ?? 0.4));
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x0a0a0a, 0.3));
+  // Default fill lights so scene is never pitch black
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6 * L));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x111111, 0.5 * L));
 
   for (const obj of sceneData.objects ?? []) {
     const node = buildNode(obj, materialRegistry);
@@ -372,7 +352,7 @@ async function main() {
   scene.updateMatrixWorld(true);
 
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-  let target = new THREE.Vector3(0, 0, 0);
+  let orbitTarget = new THREE.Vector3(0, 0, 0);
 
   if (cameraInfo) {
     camera.fov = cameraInfo.fov;
@@ -386,15 +366,32 @@ async function main() {
       cameraNode.getWorldQuaternion(camera.quaternion);
     }
     const forward = camera.getWorldDirection(new THREE.Vector3());
-    target = camera.position.clone().addScaledVector(forward, 10);
+    orbitTarget = camera.position.clone().addScaledVector(forward, 10);
   } else {
     camera.position.set(9, 7, 12);
   }
 
+  // ── Postprocessing ──────────────────────────────────────────────────────────
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  if (rs.bloom !== false) {
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      rs.bloomIntensity ?? 0.5,
+      0.4,   // radius
+      0.1    // threshold — low so lights and emissives glow
+    );
+    composer.addPass(bloom);
+  }
+  composer.addPass(new OutputPass());
+
+  // ── Game components ─────────────────────────────────────────────────────────
   const playerObj = findWithComponent(sceneData.objects, "PlayerController");
   const playerNode = playerObj ? objectById.get(playerObj.id) : null;
   const playerIsCamera = Boolean(playerObj && getComponent(playerObj, "Camera"));
-  const weaponObj = playerObj && getComponent(playerObj, "Weapon") ? playerObj : findWithComponent(sceneData.objects, "Weapon");
+  const weaponObj = playerObj && getComponent(playerObj, "Weapon")
+    ? playerObj
+    : findWithComponent(sceneData.objects, "Weapon");
   const weaponCfg = getComponent(weaponObj, "Weapon") ?? {};
   const hasWeapon = Boolean(playerObj && weaponObj);
   const damageTargets = collectDamageTargets(sceneData.objects, playerObj?.id ?? null).map((obj) => ({
@@ -407,7 +404,7 @@ async function main() {
   overlay.setHud(hasWeapon && damageTargets.length ? `Targets 0/${damageTargets.length}` : "");
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.copy(target);
+  controls.target.copy(orbitTarget);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 2;
@@ -435,56 +432,44 @@ async function main() {
   let targetsHit = 0;
   const raycaster = new THREE.Raycaster();
 
-  window.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
-  });
-  window.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
-  });
+  window.addEventListener("keydown", (e) => { keys[e.key.toLowerCase()] = true; });
+  window.addEventListener("keyup",   (e) => { keys[e.key.toLowerCase()] = false; });
 
   renderer.domElement.addEventListener("pointerdown", () => {
     fireHeld = true;
     if (playerIsCamera) renderer.domElement.requestPointerLock?.();
   });
-  window.addEventListener("pointerup", () => {
-    fireHeld = false;
-  });
+  window.addEventListener("pointerup", () => { fireHeld = false; });
   document.addEventListener("pointerlockchange", () => {
     lookActive = document.pointerLockElement === renderer.domElement;
   });
   document.addEventListener("mousemove", (e) => {
     if (!lookActive || !playerIsCamera) return;
-    yaw -= e.movementX * 0.0022;
-    pitch = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, pitch - e.movementY * 0.0022));
+    yaw   -= e.movementX * 0.0022;
+    pitch  = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, pitch - e.movementY * 0.0022));
   });
 
   function fireWeapon() {
-    const range = Number.isFinite(weaponCfg.range) ? weaponCfg.range : 60;
+    const range  = Number.isFinite(weaponCfg.range)  ? weaponCfg.range  : 60;
     const damage = Number.isFinite(weaponCfg.damage) ? weaponCfg.damage : 1;
     const origin = camera.getWorldPosition(new THREE.Vector3());
-    const direction = camera.getWorldDirection(new THREE.Vector3()).normalize();
-    raycaster.set(origin, direction);
+    const dir    = camera.getWorldDirection(new THREE.Vector3()).normalize();
+    raycaster.set(origin, dir);
     raycaster.far = range;
     let closest = null;
-    for (const target of damageTargets) {
-      if (!target.alive) continue;
-      const node = objectById.get(target.id);
-      if (!node || !node.visible) continue;
+    for (const t of damageTargets) {
+      if (!t.alive) continue;
+      const node = objectById.get(t.id);
+      if (!node?.visible) continue;
       const hit = raycaster.intersectObject(node, true)[0];
-      if (hit && (!closest || hit.distance < closest.distance)) closest = { target, node, hit };
+      if (hit && (!closest || hit.distance < closest.distance)) closest = { target: t, node, hit };
     }
-
-    const end = closest?.hit.point ?? origin.clone().addScaledVector(direction, range);
-    const geometry = new THREE.BufferGeometry().setFromPoints([origin, end]);
-    const material = new THREE.LineBasicMaterial({ color: closest ? "#fef08a" : "#67e8f9", transparent: true, opacity: 0.85 });
-    const line = new THREE.Line(geometry, material);
+    const end = closest?.hit.point ?? origin.clone().addScaledVector(dir, range);
+    const geo = new THREE.BufferGeometry().setFromPoints([origin, end]);
+    const mat = new THREE.LineBasicMaterial({ color: closest ? "#fef08a" : "#67e8f9", transparent: true, opacity: 0.85 });
+    const line = new THREE.Line(geo, mat);
     scene.add(line);
-    setTimeout(() => {
-      scene.remove(line);
-      geometry.dispose();
-      material.dispose();
-    }, 70);
-
+    setTimeout(() => { scene.remove(line); geo.dispose(); mat.dispose(); }, 70);
     if (!closest) return;
     closest.target.hp -= damage;
     if (closest.target.hp > 0) return;
@@ -498,33 +483,34 @@ async function main() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
   });
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
 
-    // Tick all GLB animation mixers
     for (const mixer of mixers) mixer.update(dt);
 
     if (playerIsCamera && playerNode) {
       camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, "YXZ"));
-      const speed = ((getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt);
+      const speed = (getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt;
       const forward = camera.getWorldDirection(new THREE.Vector3());
       forward.y = 0;
       if (forward.lengthSq() < 1e-6) forward.set(0, 0, -1);
       forward.normalize();
       const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
       const move = new THREE.Vector3();
-      if (keys.w || keys.arrowup) move.add(forward);
-      if (keys.s || keys.arrowdown) move.sub(forward);
+      if (keys.w || keys.arrowup)    move.add(forward);
+      if (keys.s || keys.arrowdown)  move.sub(forward);
       if (keys.d || keys.arrowright) move.add(right);
-      if (keys.a || keys.arrowleft) move.sub(right);
+      if (keys.a || keys.arrowleft)  move.sub(right);
       if (move.lengthSq() > 0) camera.position.addScaledVector(move.normalize(), speed);
       playerNode.position.copy(camera.position);
       playerNode.quaternion.copy(camera.quaternion);
     } else {
       controls.update();
     }
+
     cooldown = Math.max(0, cooldown - dt);
     const triggerHeld = fireHeld || keys[" "] || keys.space || keys.spacebar;
     if (hasWeapon && triggerHeld && cooldown <= 0) {
@@ -532,7 +518,8 @@ async function main() {
       cooldown = 1 / fireRate;
       fireWeapon();
     }
-    renderer.render(scene, camera);
+
+    composer.render();
   });
 }
 
