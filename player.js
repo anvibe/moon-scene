@@ -10,9 +10,6 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const D2R = Math.PI / 180;
 
-// Three.js r155+ uses physical light units. Scale up to match legacy editor values.
-const L = Math.PI;
-
 // ---------------------------------------------------------------------------
 // Materials
 // ---------------------------------------------------------------------------
@@ -204,7 +201,7 @@ function buildNode(obj, materialRegistry) {
     let light = null;
     switch (obj.light) {
       case "directional":
-        light = new THREE.DirectionalLight(color, intensity * 1.4 * L);
+        light = new THREE.DirectionalLight(color, intensity * 1.4);
         if (shadowLightCount === 0) {
           light.castShadow = true;
           light.shadow.mapSize.set(2048, 2048);
@@ -220,13 +217,13 @@ function buildNode(obj, materialRegistry) {
         break;
       case "point":
         // Point shadows use 6 texture units (cube map) — skip to stay under limit
-        light = new THREE.PointLight(color, intensity * 8 * L, 30);
+        light = new THREE.PointLight(color, intensity * 8, 30);
         break;
       case "spot":
-        light = new THREE.SpotLight(color, intensity * 10 * L, 0, 0.5, 0.4);
+        light = new THREE.SpotLight(color, intensity * 10, 0, 0.5, 0.4);
         break;
       case "ambient":
-        light = new THREE.AmbientLight(color, intensity * L);
+        light = new THREE.AmbientLight(color, intensity);
         break;
     }
     if (light) group.add(light);
@@ -338,12 +335,8 @@ async function main() {
 
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 1.2;
+  scene.environmentIntensity = 0.5;
   pmremGenerator.dispose();
-
-  // Default fill lights so scene is never pitch black
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6 * L));
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x111111, 0.5 * L));
 
   for (const obj of sceneData.objects ?? []) {
     const node = buildNode(obj, materialRegistry);
@@ -379,7 +372,7 @@ async function main() {
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       rs.bloomIntensity ?? 0.5,
       0.4,   // radius
-      0.1    // threshold — low so lights and emissives glow
+      0.85   // threshold — only very bright spots bloom
     );
     composer.addPass(bloom);
   }
