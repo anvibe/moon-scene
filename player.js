@@ -1,12 +1,18 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+// RectAreaLight needs its BRDF lookup tables initialised before it emits light.
+RectAreaLightUniformsLib.init();
 
 // Same CDN and preset→file mapping used by @react-three/drei <Environment preset="...">
 const DREI_HDR_BASE = "https://raw.githack.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/";
@@ -60,7 +66,7 @@ function makeGeometry(type) {
 
 function isLoadableModel(url) {
   if (!url) return false;
-  return /\.(glb|gltf)(\?.*)?$/i.test(url) || url.startsWith("blob:") || url.startsWith("data:");
+  return /\.(glb|gltf|fbx|obj)(\?.*)?$/i.test(url) || url.startsWith("blob:") || url.startsWith("data:");
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +76,18 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
+const fbxLoader = new FBXLoader();
+const objLoader = new OBJLoader();
+const textureLoader = new THREE.TextureLoader();
+
+function modelExtension(url) {
+  return (url || "").split(/[?#]/)[0].split(".").pop()?.toLowerCase() || "glb";
+}
+
+// Cubic ease used by the editor's cinematic shot transitions.
+function easeInOut(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
 
 // ---------------------------------------------------------------------------
 // Material downgrade: MeshPhysicalMaterial → MeshStandardMaterial
@@ -133,7 +151,8 @@ function applyMaterialOverride(root, materialId, registry) {
 let cameraInfo = null;
 const objectById = new Map();
 const sceneObjectById = new Map();
-const mixers = [];
+const mixers = [];          // { mixer, speed }
+const objectAnimations = []; // { node, cfg, basePosition, baseScale }
 let shadowLightCount = 0; // only 1 directional light gets a shadow map
 
 function placeholderMesh(color) {
@@ -144,6 +163,68 @@ function placeholderMesh(color) {
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+// Mirrors the editor's GLTFModel/FBXModel clip handling: a model animates only
+// when its `animation.playing` flag is true, plays the chosen `activeClip`
+// (falling back to the first), and honours `loop`/`speed`.
+function setupClips(obj, model, clips) {
+  if (!clips || clips.length === 0) return;
+  const a = obj.animation;
+  if (!a || a.playing !== true) return; // matches editor: static unless playing
+
+  const named = clips.map((c, i) => ({ clip: c, name: c.name || `Clip ${i + 1}` }));
+  const chosen = (a.activeClip && named.find((n) => n.name === a.activeClip)?.clip) || clips[0];
+
+  const mixer = new THREE.AnimationMixer(model);
+  const action = mixer.clipAction(chosen);
+  action.setLoop(a.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+  action.clampWhenFinished = a.loop === false;
+  action.reset().play();
+  mixers.push({ mixer, speed: a.speed ?? 1 });
+}
+
+function loadModel(obj, parent, placeholder, materialRegistry) {
+  const url = obj.assetUrl;
+  const ext = modelExtension(url);
+
+  const onLoaded = (root, clips) => {
+    root.traverse((o) => {
+      if (!o.isMesh) return;
+      o.castShadow = true;
+      o.receiveShadow = true;
+    });
+    downgradeMaterials(root);
+    applyMaterialOverride(root, obj.materialId, materialRegistry);
+
+    // Fractured model: render only the named sub-node, neutralising its local
+    // transform (the wrapping group already carries the part's placement).
+    if (obj.glbNodeName) {
+      const node = root.getObjectByName(obj.glbNodeName);
+      if (node) {
+        node.position.set(0, 0, 0);
+        node.rotation.set(0, 0, 0);
+        node.scale.set(1, 1, 1);
+        parent.remove(placeholder);
+        parent.add(node);
+        return;
+      }
+    }
+
+    parent.remove(placeholder);
+    parent.add(root);
+    setupClips(obj, root, clips);
+  };
+
+  const onError = () => {}; // keep placeholder on failure
+
+  if (ext === "fbx") {
+    fbxLoader.load(url, (m) => onLoaded(m, m.animations ?? []), undefined, onError);
+  } else if (ext === "obj") {
+    objLoader.load(url, (m) => onLoaded(m, []), undefined, onError);
+  } else {
+    gltfLoader.load(url, (gltf) => onLoaded(gltf.scene, gltf.animations ?? []), undefined, onError);
+  }
 }
 
 function buildNode(obj, materialRegistry) {
@@ -160,6 +241,16 @@ function buildNode(obj, materialRegistry) {
   group.position.set(px, py, pz);
   group.rotation.set(rx * D2R, ry * D2R, rz * D2R);
   group.scale.set(sx, sy, sz);
+
+  // Looping transform animation (rotate / translate / scale) — driven per-frame.
+  if (obj.objectAnimation?.enabled) {
+    objectAnimations.push({
+      node: group,
+      cfg: obj.objectAnimation,
+      basePosition: [px, py, pz],
+      baseScale: [sx, sy, sz],
+    });
+  }
 
   const color = obj.color ?? "#d4d4d8";
 
@@ -184,35 +275,44 @@ function buildNode(obj, materialRegistry) {
     group.add(mesh);
 
   } else if (obj.type === "model") {
+    // baseScale ("Apply Scale") and pivotOffset ("Center Pivot") are baked onto
+    // a wrapper group inside the node, exactly like the editor's SceneNode.
+    const wrapper = new THREE.Group();
+    const [ox, oy, oz] = obj.pivotOffset ?? [0, 0, 0];
+    const [bsx, bsy, bsz] = obj.baseScale ?? [1, 1, 1];
+    wrapper.position.set(ox, oy, oz);
+    wrapper.scale.set(bsx, bsy, bsz);
+    group.add(wrapper);
+
     const placeholder = placeholderMesh(color);
-    group.add(placeholder);
+    wrapper.add(placeholder);
     if (isLoadableModel(obj.assetUrl)) {
-      gltfLoader.load(
-        obj.assetUrl,
-        (gltf) => {
-          const model = gltf.scene;
-          downgradeMaterials(model);
-          model.traverse((o) => {
-            if (!o.isMesh) return;
-            o.castShadow = true;
-            o.receiveShadow = true;
-          });
-          applyMaterialOverride(model, obj.materialId, materialRegistry);
-          group.remove(placeholder);
-          group.add(model);
-          if (gltf.animations?.length > 0) {
-            const mixer = new THREE.AnimationMixer(model);
-            gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
-            mixers.push(mixer);
-          }
-        },
-        undefined,
-        () => {} // keep placeholder on failure
-      );
+      loadModel(obj, wrapper, placeholder, materialRegistry);
+    }
+
+  } else if (obj.type === "sprite") {
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        color: obj.color ?? "#ffffff",
+        transparent: true,
+        opacity: obj.spriteUrl ? 1 : 0.85,
+        side: THREE.DoubleSide,
+      })
+    );
+    group.add(mesh);
+    if (obj.spriteUrl) {
+      textureLoader.load(obj.spriteUrl, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        mesh.material.map = tex;
+        mesh.material.alphaTest = 0.05;
+        mesh.material.needsUpdate = true;
+      });
     }
 
   } else if (obj.type === "light" && obj.light) {
-    const intensity = obj.components?.find((c) => c.type === "Light")?.config?.intensity ?? 1;
+    const lightCfg = obj.components?.find((c) => c.type === "Light")?.config ?? {};
+    const intensity = lightCfg.intensity ?? 1;
     let light = null;
     switch (obj.light) {
       case "directional":
@@ -240,6 +340,12 @@ function buildNode(obj, materialRegistry) {
       case "ambient":
         light = new THREE.AmbientLight(color, intensity);
         break;
+      case "area": {
+        const w = lightCfg.width ?? 4;
+        const h = lightCfg.height ?? 2;
+        light = new THREE.RectAreaLight(color, intensity * 6, w, h);
+        break;
+      }
     }
     if (light) group.add(light);
   }
@@ -329,6 +435,8 @@ function stripTS(code) {
   let src = code;
   src = src.replace(/^[ \t]*import[^\n;]*;?[ \t]*$/gm, "");
   src = src.replace(/\b(public|private|protected|readonly)\s+/g, "");
+  // Strip type assertions: (x as Type) → (x)
+  src = src.replace(/\s+as\s+\w+(?:<[^>]*>)?(?:\[\])?/g, "");
   src = src.replace(
     /:\s*(?:[A-Z][\w.]*|number|string|boolean|any|unknown|void|never|object|symbol|bigint)(?:<[^>]*>)?(?:\[\])?/g,
     ""
@@ -482,9 +590,9 @@ async function main() {
   if (rs.bloom !== false) {
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      rs.bloomIntensity ?? 0.5,
-      0.4,   // radius
-      0.3    // threshold — catches emissive objects and light halos
+      (rs.bloomIntensity ?? 0.5) * 0.3,  // scale down: UnrealBloom is stronger than editor's postprocessing Bloom
+      0.6,   // wider radius = softer glow
+      0.2    // same luminanceThreshold as editor's <Bloom luminanceThreshold={0.2}>
     );
     composer.addPass(bloom);
   }
@@ -512,13 +620,14 @@ async function main() {
   // WASD moves the player; orbit controls orbit around them.
   const playerIsThirdPerson = Boolean(playerObj && playerNode && !playerIsCamera);
 
+  // Orbit controls only for scenes without a player (free-look) or first-person
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 2;
   controls.maxDistance = 80;
   controls.maxPolarAngle = Math.PI / 2.05;
-  controls.enabled = !playerIsCamera; // orbit always on except in first-person
+  controls.enabled = !playerIsCamera && !playerIsThirdPerson;
   controls.update();
 
   if (playerIsCamera && playerNode) {
@@ -530,15 +639,42 @@ async function main() {
     if (center) camera.lookAt(center);
     playerNode.quaternion.copy(camera.quaternion);
   } else if (playerIsThirdPerson) {
-    // Third-person: start camera behind the player
+    // Third-person: start camera above and behind the player (world +Z = behind)
     playerNode.updateWorldMatrix(true, false);
     const playerPos = playerNode.getWorldPosition(new THREE.Vector3());
-    controls.target.copy(playerPos);
-    camera.position.copy(playerPos).add(new THREE.Vector3(0, 4, 10));
-    controls.update();
+    camera.position.set(playerPos.x, playerPos.y + 6, playerPos.z + 10);
+    camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
   } else {
     controls.target.copy(orbitTarget);
     controls.update();
+  }
+
+  // ── Cinematic camera shots (Animation panel timeline) ───────────────────────
+  // Auto-plays the captured shot sequence when there's no interactive player.
+  const shots = data.animationShots ?? [];
+  const loopMode = data.animationLoop ?? "none";
+  const cinematic = shots.length > 0 && !playerObj;
+  let cineIdx = 0;      // shot we're currently transitioning into / holding
+  let cinePlayhead = 0; // seconds elapsed within the current shot
+  let cineDir = 1;      // 1 = forward, -1 = backward (ping-pong)
+  let cineDone = false; // reached the end with loop disabled
+  const cineTarget = new THREE.Vector3();
+
+  const snapToShot = (i) => {
+    const s = shots[i];
+    if (!s) return;
+    camera.position.set(...s.position);
+    cineTarget.set(...s.target);
+    camera.lookAt(cineTarget);
+  };
+
+  if (cinematic) {
+    controls.enabled = false;
+    if (Number.isFinite(shots[0].fov)) {
+      camera.fov = shots[0].fov;
+      camera.updateProjectionMatrix();
+    }
+    snapToShot(0);
   }
 
   const keys = {};
@@ -690,7 +826,30 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.05);
     scriptTime += dt;
 
-    for (const mixer of mixers) mixer.update(dt);
+    for (const m of mixers) m.mixer.update(dt * m.speed);
+
+    // ── Looping transform animations (rotate / translate / scale) ──────────────
+    for (const a of objectAnimations) {
+      const { node: g, cfg } = a;
+      const axisIdx = cfg.axis === "x" ? 0 : cfg.axis === "y" ? 1 : 2;
+      if (cfg.type === "rotate") {
+        const angle = (scriptTime * cfg.speed * Math.PI) / 180;
+        if (axisIdx === 0) g.rotation.x = angle;
+        else if (axisIdx === 1) g.rotation.y = angle;
+        else g.rotation.z = angle;
+      } else if (cfg.type === "translate") {
+        const delta = Math.sin(scriptTime * cfg.speed * Math.PI * 2) * cfg.amplitude;
+        const base = [...a.basePosition];
+        base[axisIdx] += delta;
+        g.position.set(base[0], base[1], base[2]);
+      } else if (cfg.type === "scale") {
+        const delta = 1 + Math.sin(scriptTime * cfg.speed * Math.PI * 2) * cfg.amplitude;
+        const [bx, by, bz] = a.baseScale;
+        if (axisIdx === 0) g.scale.set(bx * delta, by, bz);
+        else if (axisIdx === 1) g.scale.set(bx, by * delta, bz);
+        else g.scale.set(bx, by, bz * delta);
+      }
+    }
 
     // ── User scripts ─────────────────────────────────────────────────────────
     for (const si of scriptInstances) {
@@ -738,27 +897,57 @@ async function main() {
       playerNode.position.copy(camera.position);
       playerNode.quaternion.copy(camera.quaternion);
     } else if (playerIsThirdPerson) {
-      // ── Third-person ─────────────────────────────────────────────────────────
+      // ── Third-person chase camera — matches Gizmo editor play mode ──────────
       const speed = (getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt;
-      const camForward = camera.getWorldDirection(new THREE.Vector3());
-      camForward.y = 0;
-      if (camForward.lengthSq() < 1e-6) camForward.set(0, 0, -1);
-      camForward.normalize();
-      const camRight = new THREE.Vector3().crossVectors(camForward, camera.up).normalize();
       const move = new THREE.Vector3();
-      if (keys.w || keys.arrowup)    move.add(camForward);
-      if (keys.s || keys.arrowdown)  move.sub(camForward);
-      if (keys.d || keys.arrowright) move.add(camRight);
-      if (keys.a || keys.arrowleft)  move.sub(camRight);
+      if (keys.w || keys.arrowup)    move.z -= 1;  // world-space: forward = -Z
+      if (keys.s || keys.arrowdown)  move.z += 1;
+      if (keys.d || keys.arrowright) move.x += 1;
+      if (keys.a || keys.arrowleft)  move.x -= 1;
       if (move.lengthSq() > 0) {
         move.normalize();
         playerNode.position.addScaledVector(move, speed);
-        // Face the direction of travel
         playerNode.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), move);
       }
-      // Orbit target tracks the player so camera follows
-      controls.target.copy(playerNode.getWorldPosition(new THREE.Vector3()));
-      controls.update();
+      // Smooth chase: lerp camera to fixed offset above/behind player
+      const playerPos = playerNode.getWorldPosition(new THREE.Vector3());
+      camera.position.lerp(new THREE.Vector3(playerPos.x, playerPos.y + 6, playerPos.z + 10), 0.08);
+      camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
+    } else if (cinematic && !cineDone) {
+      // ── Cinematic shot playback — mirrors AnimationPanel's transport ─────────
+      cinePlayhead += dt;
+      const shot = shots[cineIdx];
+      const fromShot = cineDir === 1 ? shots[cineIdx - 1] : shots[cineIdx];
+      const toShot   = cineDir === 1 ? shots[cineIdx]     : shots[cineIdx - 1];
+      const transDuration = (cineDir === 1
+        ? shot.duration
+        : (shots[cineIdx - 1]?.duration ?? shot.duration)) || 0.0001;
+
+      if (fromShot && toShot && shot.transition === "ease") {
+        const t = easeInOut(Math.min(cinePlayhead / transDuration, 1));
+        camera.position.lerpVectors(new THREE.Vector3(...fromShot.position), new THREE.Vector3(...toShot.position), t);
+        cineTarget.lerpVectors(new THREE.Vector3(...fromShot.target), new THREE.Vector3(...toShot.target), t);
+        camera.lookAt(cineTarget);
+      }
+
+      if (cinePlayhead >= transDuration) {
+        cinePlayhead = 0;
+        if (cineDir === 1) {
+          const next = cineIdx + 1;
+          if (next >= shots.length) {
+            if (loopMode === "loop") { cineIdx = 0; snapToShot(0); }
+            else if (loopMode === "ping-pong") { cineDir = -1; }
+            else { cineDone = true; }
+          } else {
+            cineIdx = next;
+            if (shots[next].transition === "cut") snapToShot(next);
+          }
+        } else {
+          const prev = cineIdx - 1;
+          if (prev < 0) { cineDir = 1; }
+          else { cineIdx = prev; if (shots[prev].transition === "cut") snapToShot(prev); }
+        }
+      }
     } else {
       // ── No player — free orbit ────────────────────────────────────────────────
       controls.update();
