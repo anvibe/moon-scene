@@ -4,20 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gizmo Scene</title>
+    <link rel="stylesheet" href="./runtime.css" />
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0a0a; }
+      #gizmo-root { height: 100vh; width: 100vw; }
       canvas { display: block; }
     </style>
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
-        }
-      }
-    </script>
   </head>
   <body>
-    <script type="module" src="./player.js"></script>
+    <div id="gizmo-root"></div>
+    <script type="module" src="./runtime.js"></script>
   </body>
 </html>

@@ -3567,5 +3567,10 @@
     }
   ],
   "animationShots": [],
-  "animationLoop": "none"
+  "animationLoop": "none",
+  "settings": {
+    "physics": true,
+    "gravity": -9.81,
+    "targetPlatform": "web"
+  }
 }
