@@ -79,6 +79,46 @@ function placeholderMesh(color) {
   return mesh;
 }
 
+// Downgrade MeshPhysicalMaterial → MeshStandardMaterial to stay within
+// WebGL's MAX_TEXTURE_IMAGE_UNITS=16 limit. Physical materials with
+// clearcoat/iridescence/transmission/sheen maps can require 20+ samplers.
+function downgradeMaterial(mat) {
+  if (!(mat && mat.isMeshPhysicalMaterial)) return mat;
+  const std = new THREE.MeshStandardMaterial({
+    color: mat.color,
+    map: mat.map,
+    normalMap: mat.normalMap,
+    normalScale: mat.normalScale,
+    roughnessMap: mat.roughnessMap,
+    metalnessMap: mat.metalnessMap,
+    aoMap: mat.aoMap,
+    aoMapIntensity: mat.aoMapIntensity,
+    emissive: mat.emissive,
+    emissiveMap: mat.emissiveMap,
+    emissiveIntensity: mat.emissiveIntensity,
+    metalness: mat.metalness,
+    roughness: mat.roughness,
+    opacity: mat.opacity,
+    transparent: mat.transparent,
+    alphaMap: mat.alphaMap,
+    side: mat.side,
+    envMapIntensity: mat.envMapIntensity,
+  });
+  mat.dispose();
+  return std;
+}
+
+function downgradeMaterials(root) {
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    if (Array.isArray(o.material)) {
+      o.material = o.material.map(downgradeMaterial);
+    } else {
+      o.material = downgradeMaterial(o.material);
+    }
+  });
+}
+
 function applyMaterialOverride(root, materialId, registry) {
   const props = materialId ? materialProps(materialId, registry) : null;
   if (!props) return;
@@ -148,6 +188,7 @@ function buildNode(obj, materialRegistry) {
         obj.assetUrl,
         (gltf) => {
           const model = gltf.scene;
+          downgradeMaterials(model);
           model.traverse((o) => {
             if (!o.isMesh) return;
             o.castShadow = true;
