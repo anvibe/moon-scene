@@ -9,9 +9,10 @@
       "hdri": "night",
       "hdriIntensity": 0.7,
       "hdriRotation": 120,
-      "showHdriBackground": false,
+      "showHdriBackground": true,
       "fogColor": "#0a0a1f",
-      "fogDensity": 0.009
+      "fogDensity": 0.009,
+      "hdriGroundProjection": true
     },
     "objects": [
       {
@@ -262,9 +263,9 @@
                 "type": "camera",
                 "transform": {
                   "position": [
-                    1.76,
-                    1.37,
-                    9.41
+                    1.82,
+                    1.68,
+                    9.38
                   ],
                   "rotation": [
                     -4.19,
