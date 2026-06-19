@@ -3501,5 +3501,69 @@
     "dofFocusDistance": 5,
     "dofFocalLength": 2,
     "dofBokehScale": 3
-  }
+  },
+  "scripts": [
+    {
+      "id": "scr_mqkpzn182xk53i",
+      "name": "CrystalSpin.ts",
+      "code": "import { Gizmo } from \"@gizmo/runtime\";\n\nexport default class CrystalSpin {\n  t = 0;\n  baseY = 0.6;\n  start(self: any) {\n    this.baseY = self.transform.position[1];\n    this.t = Math.random() * 6;\n  }\n  update(self: any, dt: number) {\n    this.t += dt;\n    self.transform.rotation[1] += dt * 90;\n    self.transform.position[1] = this.baseY + Math.sin(this.t * 2) * 0.15;\n  }\n}\n",
+      "language": "typescript",
+      "attachedTo": [
+        "obj_mqkpzda12a1zii",
+        "obj_mqkpzda12d929u",
+        "obj_mqkpzda12gis0e",
+        "obj_mqkpzda12jrup3",
+        "obj_mqkpzda22meies",
+        "obj_mqkpzda22pftcq"
+      ]
+    },
+    {
+      "id": "scr_mqkqkns83u6i7h",
+      "name": "CrystalCollect.ts",
+      "code": "import { Gizmo } from \"@gizmo/runtime\";\n\nlet totalScore = 0;\n\nexport default class CrystalCollect {\n  constructor() {\n    (this as any)._base = 0;\n    (this as any)._t = Math.random() * 6.28;\n  }\n\n  start(self: any) {\n    (this as any)._base = self.transform.position[1];\n  }\n\n  update(self: any, dt: number) {\n    (this as any)._t += dt * 1.6;\n    self.transform.rotation[1] += dt * 1.8;\n    self.transform.position[1] = (this as any)._base + Math.sin((this as any)._t) * 0.25;\n  }\n\n  onTriggerEnter(self: any, other: any) {\n    if (other.tag !== \"Player\") return;\n    totalScore += 10;\n    Gizmo.ui.set(\"Score\", totalScore + \" pts\");\n    if (totalScore >= 60) {\n      Gizmo.ui.set(\"Mission\", \"COMPLETE ✓\");\n    }\n    self.destroy();\n  }\n}\n",
+      "language": "typescript",
+      "attachedTo": [
+        "obj_mqkpzda12a1zii",
+        "obj_mqkpzda12d929u",
+        "obj_mqkpzda12gis0e",
+        "obj_mqkpzda12jrup3",
+        "obj_mqkpzda22meies",
+        "obj_mqkpzda22pftcq"
+      ]
+    },
+    {
+      "id": "scr_mqkqkns83vfku7",
+      "name": "OrbitDrone.ts",
+      "code": "import { Gizmo } from \"@gizmo/runtime\";\n\nlet totalScore = 0;\n\nexport default class OrbitDrone {\n  constructor() {\n    (this as any)._angle = Math.random() * 6.28;\n  }\n\n  update(self: any, dt: number) {\n    let radius = 8;\n    let altitude = 2;\n    let speed = 0.6;\n\n    if (self.name === \"Drone 2\") {\n      radius = 12;\n      altitude = 3.5;\n      speed = 0.4;\n    }\n\n    (this as any)._angle += dt * speed;\n    const angle = (this as any)._angle;\n    self.transform.position[0] = Math.cos(angle) * radius;\n    self.transform.position[1] = altitude;\n    self.transform.position[2] = Math.sin(angle) * radius;\n  }\n\n  onTriggerEnter(self: any, other: any) {\n    if (other.tag !== \"Player\") return;\n    totalScore = 0;\n    Gizmo.ui.set(\"Score\", \"0 pts\");\n    Gizmo.ui.set(\"Alert\", \"⚠ Drone hit! Score reset\");\n  }\n}\n",
+      "language": "typescript",
+      "attachedTo": [
+        "obj_mqkqka9x3iudvy",
+        "obj_mqkqka9x3lhcwg"
+      ]
+    },
+    {
+      "id": "scr_mqkrnyxp25yxyc",
+      "name": "CrystalCollect.ts",
+      "code": "import { Gizmo } from \"@gizmo/runtime\";\n\nlet totalScore = 0;\nlet collected = 0;\n\nexport default class CrystalCollect {\n  constructor() {\n    (this as any)._base = 0;\n    (this as any)._t = Math.random() * 6.28;\n  }\n\n  start(self: any) {\n    (this as any)._base = self.transform.position[1];\n  }\n\n  update(self: any, dt: number) {\n    (this as any)._t += dt * 1.6;\n    self.transform.rotation[1] += dt * 1.8;\n    self.transform.position[1] =\n      (this as any)._base + Math.sin((this as any)._t) * 0.25;\n  }\n\n  onTriggerEnter(self: any, other: any) {\n    if (other.tag !== \"Player\") return;\n    totalScore += 10;\n    collected += 1;\n    Gizmo.ui.set(\"Score\", totalScore + \" pts\");\n    if (collected >= 6) {\n      Gizmo.ui.set(\"Mission\", \"COMPLETE ✓ You win!\");\n    }\n    self.destroy();\n  }\n}\n",
+      "language": "typescript",
+      "attachedTo": [
+        "obj_mqkpzda12a1zii",
+        "obj_mqkpzda12d929u",
+        "obj_mqkpzda12gis0e",
+        "obj_mqkpzda12jrup3",
+        "obj_mqkpzda22meies",
+        "obj_mqkpzda22pftcq"
+      ]
+    },
+    {
+      "id": "scr_mqkro5wj27c8nj",
+      "name": "OrbitDrone.ts",
+      "code": "import { Gizmo } from \"@gizmo/runtime\";\n\nlet totalScore = 0;\n\nexport default class OrbitDrone {\n  constructor() {\n    (this as any)._angle = Math.random() * 6.28;\n  }\n\n  start(self: any) {\n    // Drone 1 orbits at radius 8, y=2; Drone 2 at radius 12, y=3.5\n    if (self.name === \"Drone 1\") {\n      (this as any)._radius = 8;\n      (this as any)._altitude = 2;\n      (this as any)._speed = 0.6;\n    } else {\n      (this as any)._radius = 12;\n      (this as any)._altitude = 3.5;\n      (this as any)._speed = 0.38;\n    }\n  }\n\n  update(self: any, dt: number) {\n    (this as any)._angle += dt * (this as any)._speed;\n    const r = (this as any)._radius;\n    const a = (this as any)._angle;\n    self.transform.position[0] = Math.cos(a) * r;\n    self.transform.position[1] = (this as any)._altitude;\n    self.transform.position[2] = Math.sin(a) * r;\n    // Spin the drone for visual effect\n    self.transform.rotation[1] += dt * 3.0;\n  }\n\n  onTriggerEnter(self: any, other: any) {\n    if (other.tag !== \"Player\") return;\n    totalScore = 0;\n    Gizmo.ui.set(\"Score\", \"0 pts\");\n    Gizmo.ui.set(\"Alert\", \"⚠ Drone hit! Score reset\");\n  }\n}\n",
+      "language": "typescript",
+      "attachedTo": [
+        "obj_mqkqka9x3iudvy",
+        "obj_mqkqka9x3lhcwg"
+      ]
+    }
+  ]
 }

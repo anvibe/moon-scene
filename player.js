@@ -2,11 +2,26 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+// Same CDN and preset→file mapping used by @react-three/drei <Environment preset="...">
+const DREI_HDR_BASE = "https://raw.githack.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/";
+const HDRI_FILES = {
+  apartment: "lebombo_1k.hdr",
+  city:      "potsdamer_platz_1k.hdr",
+  dawn:      "kiara_1_dawn_1k.hdr",
+  forest:    "forest_slope_1k.hdr",
+  lobby:     "st_fagans_interior_1k.hdr",
+  night:     "dikhololo_night_1k.hdr",
+  park:      "rooitou_park_1k.hdr",
+  studio:    "studio_small_03_1k.hdr",
+  sunset:    "venice_sunset_1k.hdr",
+  warehouse: "empty_warehouse_01_1k.hdr",
+};
 
 const D2R = Math.PI / 180;
 
@@ -308,6 +323,61 @@ function addOverlay() {
 }
 
 // ---------------------------------------------------------------------------
+// Script runtime (mirrors src/lib/scriptRuntime.ts)
+// ---------------------------------------------------------------------------
+function stripTS(code) {
+  let src = code;
+  src = src.replace(/^[ \t]*import[^\n;]*;?[ \t]*$/gm, "");
+  src = src.replace(/\b(public|private|protected|readonly)\s+/g, "");
+  src = src.replace(
+    /:\s*(?:[A-Z][\w.]*|number|string|boolean|any|unknown|void|never|object|symbol|bigint)(?:<[^>]*>)?(?:\[\])?/g,
+    ""
+  );
+  src = src.replace(/export\s+default\s+/, "return ");
+  src = src.replace(/\bexport\s+/g, "");
+  return src;
+}
+
+function deriveTag(obj) {
+  if (obj.components?.some((c) => c.type === "PlayerController")) return "Player";
+  if (obj.components?.some((c) => c.type === "EnemyAI")) return "Enemy";
+  if (obj.components?.some((c) => c.type === "Health")) return "Target";
+  if (obj.components?.some((c) => c.type === "Collectible")) return "Collectible";
+  return obj.name;
+}
+
+function makeScriptHandle(sceneObj, obj3d) {
+  return {
+    id: sceneObj.id,
+    name: sceneObj.name,
+    tag: deriveTag(sceneObj),
+    transform: {
+      position: [obj3d.position.x, obj3d.position.y, obj3d.position.z],
+      rotation: [obj3d.rotation.x, obj3d.rotation.y, obj3d.rotation.z],
+      scale:    [obj3d.scale.x,    obj3d.scale.y,    obj3d.scale.z   ],
+    },
+    get(type) { return sceneObj.components?.find((c) => c.type === type)?.config ?? {}; },
+    destroy() { obj3d.visible = false; this.__destroyed = true; },
+    __obj: obj3d,
+    __destroyed: false,
+  };
+}
+
+function syncIn(h) {
+  const o = h.__obj;
+  h.transform.position[0] = o.position.x; h.transform.position[1] = o.position.y; h.transform.position[2] = o.position.z;
+  h.transform.rotation[0] = o.rotation.x; h.transform.rotation[1] = o.rotation.y; h.transform.rotation[2] = o.rotation.z;
+  h.transform.scale[0]    = o.scale.x;    h.transform.scale[1]    = o.scale.y;    h.transform.scale[2]    = o.scale.z;
+}
+
+function syncOut(h) {
+  const o = h.__obj;
+  o.position.set(h.transform.position[0], h.transform.position[1], h.transform.position[2]);
+  o.rotation.set(h.transform.rotation[0], h.transform.rotation[1], h.transform.rotation[2]);
+  o.scale.set(h.transform.scale[0], h.transform.scale[1], h.transform.scale[2]);
+}
+
+// ---------------------------------------------------------------------------
 // Bootstrap
 // ---------------------------------------------------------------------------
 async function main() {
@@ -331,12 +401,54 @@ async function main() {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(env.background || "#0a0a0a");
-  if (env.fog) scene.fog = new THREE.Fog(env.background || "#0a0a0a", 24, 60);
 
+  if (env.fog) {
+    scene.fog = new THREE.FogExp2(env.fogColor || env.background || "#0a0a0a", env.fogDensity ?? 0.02);
+  }
+
+  // Ambient light from scene environment settings
+  if ((env.ambientIntensity ?? 0) > 0) {
+    scene.add(new THREE.AmbientLight(0xffffff, env.ambientIntensity));
+  }
+
+  // Load the same HDRI that Drei uses in the editor
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.5;
-  pmremGenerator.dispose();
+  pmremGenerator.compileEquirectangularShader();
+
+  const hdriFile = HDRI_FILES[env.hdri] || HDRI_FILES.city;
+  new RGBELoader().load(DREI_HDR_BASE + hdriFile, (hdrTexture) => {
+    const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+    hdrTexture.dispose();
+    pmremGenerator.dispose();
+
+    scene.environment = envMap;
+    scene.environmentIntensity = env.hdriIntensity ?? 0.3;
+    if (env.showHdriBackground) {
+      scene.background = envMap;
+      scene.backgroundIntensity = env.hdriIntensity ?? 0.3;
+      // rotate the background to match editor rotation
+      scene.backgroundRotation = new THREE.Euler(0, ((env.hdriRotation ?? 0) * Math.PI) / 180, 0);
+    }
+    scene.environmentRotation = new THREE.Euler(0, ((env.hdriRotation ?? 0) * Math.PI) / 180, 0);
+  });
+
+  // Vignette overlay — matches editor's vignette slider
+  if ((rs.vignetteStrength ?? 0) > 0) {
+    const vig = document.createElement("div");
+    const s = rs.vignetteStrength ?? 0.5;
+    vig.style.cssText = `position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,${s.toFixed(2)}) 100%)`;
+    document.body.appendChild(vig);
+  }
+
+  // Color-grading via CSS filters — matches saturation/contrast/brightness sliders
+  {
+    const sat = 1 + (rs.saturation ?? 0);
+    const con = 1 + (rs.contrast   ?? 0);
+    const bri = 1 + (rs.brightness ?? 0);
+    if (sat !== 1 || con !== 1 || bri !== 1) {
+      renderer.domElement.style.filter = `saturate(${sat}) contrast(${con}) brightness(${bri})`;
+    }
+  }
 
   for (const obj of sceneData.objects ?? []) {
     const node = buildNode(obj, materialRegistry);
@@ -372,7 +484,7 @@ async function main() {
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       rs.bloomIntensity ?? 0.5,
       0.4,   // radius
-      0.85   // threshold — only very bright spots bloom
+      0.3    // threshold — catches emissive objects and light halos
     );
     composer.addPass(bloom);
   }
@@ -396,27 +508,122 @@ async function main() {
   overlay.setArmed(hasWeapon);
   overlay.setHud(hasWeapon && damageTargets.length ? `Targets 0/${damageTargets.length}` : "");
 
+  // Third-person mode: PlayerController present but no Camera component on the player.
+  // WASD moves the player; orbit controls orbit around them.
+  const playerIsThirdPerson = Boolean(playerObj && playerNode && !playerIsCamera);
+
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.copy(orbitTarget);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 2;
   controls.maxDistance = 80;
   controls.maxPolarAngle = Math.PI / 2.05;
-  controls.enabled = !playerIsCamera;
+  controls.enabled = !playerIsCamera; // orbit always on except in first-person
   controls.update();
 
   if (playerIsCamera && playerNode) {
+    // First-person: camera sits at the player's world position
     playerNode.updateWorldMatrix(true, false);
     playerNode.getWorldPosition(camera.position);
     playerNode.getWorldQuaternion(camera.quaternion);
     const center = hasWeapon ? targetCentroid(damageTargets) : null;
     if (center) camera.lookAt(center);
     playerNode.quaternion.copy(camera.quaternion);
+  } else if (playerIsThirdPerson) {
+    // Third-person: start camera behind the player
+    playerNode.updateWorldMatrix(true, false);
+    const playerPos = playerNode.getWorldPosition(new THREE.Vector3());
+    controls.target.copy(playerPos);
+    camera.position.copy(playerPos).add(new THREE.Vector3(0, 4, 10));
+    controls.update();
+  } else {
+    controls.target.copy(orbitTarget);
+    controls.update();
   }
 
   const keys = {};
   const clock = new THREE.Clock();
+
+  // ── Script system ──────────────────────────────────────────────────────────
+  const rawScripts = data.scripts ?? [];
+  let scriptTime = 0;
+  const hudMap = {};
+  let scriptHudEl = null;
+
+  function setScriptHud(key, val) {
+    hudMap[key] = String(val);
+    if (!scriptHudEl) {
+      scriptHudEl = document.createElement("div");
+      scriptHudEl.style.cssText = "position:fixed;top:16px;right:16px;pointer-events:none;font:600 14px system-ui;color:white;z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:6px";
+      document.body.appendChild(scriptHudEl);
+    }
+    scriptHudEl.innerHTML = Object.entries(hudMap).map(([, v]) =>
+      `<div style="background:rgba(10,10,10,.75);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 12px">${v}</div>`
+    ).join("");
+  }
+
+  const Gizmo = {
+    get time() { return scriptTime; },
+    ui: { set: setScriptHud },
+    find(name) {
+      for (const [id, obj] of sceneObjectById) {
+        if (obj.name === name) {
+          const node = objectById.get(id);
+          if (!node) return null;
+          const h = makeScriptHandle(obj, node);
+          syncIn(h);
+          return h;
+        }
+      }
+      return null;
+    },
+    distance(a, b) {
+      const pa = a.transform.position, pb = b.transform.position;
+      return Math.hypot(pa[0] - pb[0], pa[1] - pb[1], pa[2] - pb[2]);
+    },
+    direction(a, b) {
+      const pa = a.transform.position, pb = b.transform.position;
+      const d = [pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]];
+      const len = Math.hypot(...d) || 1;
+      return d.map((x) => x / len);
+    },
+    log: (...args) => console.log("[Script]", ...args),
+  };
+  const Input = { key: (k) => Boolean(keys[k?.toLowerCase()]) };
+
+  function compileScript(code) {
+    try {
+      const body = '"use strict";\n' + stripTS(code);
+      const factory = new Function("Gizmo", "Input", body);
+      const exported = factory(Gizmo, Input);
+      if (typeof exported === "function") return new exported();
+      if (exported && typeof exported === "object") return exported;
+    } catch (e) {
+      console.warn("[Script compile]", e.message);
+    }
+    return null;
+  }
+
+  const scriptInstances = [];
+  for (const script of rawScripts) {
+    const instance = compileScript(script.code);
+    if (!instance) continue;
+    for (const objId of script.attachedTo ?? []) {
+      const sceneObj = sceneObjectById.get(objId);
+      const node = objectById.get(objId);
+      if (!sceneObj || !node) continue;
+      scriptInstances.push({ instance, sceneObj, node, handle: makeScriptHandle(sceneObj, node), started: false, triggered: false });
+    }
+  }
+
+  // Call start() on all scripts once before the loop
+  for (const si of scriptInstances) {
+    syncIn(si.handle);
+    try { si.instance.start?.(si.handle); } catch (e) { console.warn("[Script start]", e.message); }
+    si.started = true;
+    syncOut(si.handle);
+  }
+
   let yaw = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ").y;
   let pitch = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ").x;
   let lookActive = false;
@@ -481,10 +688,40 @@ async function main() {
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
+    scriptTime += dt;
 
     for (const mixer of mixers) mixer.update(dt);
 
+    // ── User scripts ─────────────────────────────────────────────────────────
+    for (const si of scriptInstances) {
+      if (si.handle.__destroyed) { si.node.visible = false; continue; }
+      syncIn(si.handle);
+      try {
+        si.instance.update?.(si.handle, dt);
+
+        if (si.instance.onTriggerEnter && playerNode) {
+          const dist = si.node.position.distanceTo(playerNode.position);
+          const near = dist < 1.6;
+          if (near && !si.triggered) {
+            si.triggered = true;
+            const playerSceneObj = sceneObjectById.get(playerObj?.id ?? "");
+            if (playerSceneObj) {
+              const other = makeScriptHandle(playerSceneObj, playerNode);
+              syncIn(other);
+              si.instance.onTriggerEnter(si.handle, other);
+            }
+          } else if (!near) {
+            si.triggered = false;
+          }
+        }
+      } catch (e) {
+        console.warn("[Script update]", e.message);
+      }
+      if (!si.handle.__destroyed) syncOut(si.handle);
+    }
+
     if (playerIsCamera && playerNode) {
+      // ── First-person ────────────────────────────────────────────────────────
       camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, "YXZ"));
       const speed = (getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt;
       const forward = camera.getWorldDirection(new THREE.Vector3());
@@ -500,7 +737,30 @@ async function main() {
       if (move.lengthSq() > 0) camera.position.addScaledVector(move.normalize(), speed);
       playerNode.position.copy(camera.position);
       playerNode.quaternion.copy(camera.quaternion);
+    } else if (playerIsThirdPerson) {
+      // ── Third-person ─────────────────────────────────────────────────────────
+      const speed = (getComponent(playerObj, "PlayerController")?.speed ?? 6) * dt;
+      const camForward = camera.getWorldDirection(new THREE.Vector3());
+      camForward.y = 0;
+      if (camForward.lengthSq() < 1e-6) camForward.set(0, 0, -1);
+      camForward.normalize();
+      const camRight = new THREE.Vector3().crossVectors(camForward, camera.up).normalize();
+      const move = new THREE.Vector3();
+      if (keys.w || keys.arrowup)    move.add(camForward);
+      if (keys.s || keys.arrowdown)  move.sub(camForward);
+      if (keys.d || keys.arrowright) move.add(camRight);
+      if (keys.a || keys.arrowleft)  move.sub(camRight);
+      if (move.lengthSq() > 0) {
+        move.normalize();
+        playerNode.position.addScaledVector(move, speed);
+        // Face the direction of travel
+        playerNode.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), move);
+      }
+      // Orbit target tracks the player so camera follows
+      controls.target.copy(playerNode.getWorldPosition(new THREE.Vector3()));
+      controls.update();
     } else {
+      // ── No player — free orbit ────────────────────────────────────────────────
       controls.update();
     }
 
