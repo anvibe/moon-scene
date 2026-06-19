@@ -9,6 +9,7 @@ import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUnifo
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 // RectAreaLight needs its BRDF lookup tables initialised before it emits light.
@@ -165,23 +166,53 @@ function placeholderMesh(color) {
   return mesh;
 }
 
-// Mirrors the editor's GLTFModel/FBXModel clip handling: a model animates only
-// when its `animation.playing` flag is true, plays the chosen `activeClip`
-// (falling back to the first), and honours `loop`/`speed`.
+// Per-object clip registry — mirrors src/lib/animationRegistry so gameplay code
+// (EnemyAI walk, player walk/idle) can cross-fade named clips on demand.
+const clipRegistry = new Map(); // id -> { mixer, clips: Map<name,clip>, active, activeName }
+
+function playClipById(id, name, fade = 0.15) {
+  const entry = clipRegistry.get(id);
+  if (!entry) return false;
+  if (entry.activeName === name) return true;
+  let clip = entry.clips.get(name);
+  if (!clip) {
+    for (const [key, c] of entry.clips) {
+      if (key.toLowerCase().includes(name.toLowerCase())) { clip = c; break; }
+    }
+  }
+  if (!clip) return false;
+  const next = entry.mixer.clipAction(clip);
+  next.reset().setLoop(THREE.LoopRepeat, Infinity).play();
+  if (entry.active && entry.active !== next) next.crossFadeFrom(entry.active, fade, false);
+  entry.active = next;
+  entry.activeName = name;
+  return true;
+}
+
+// Registers a model's clips so they can be played later, and auto-plays the
+// selected `activeClip` when `animation.playing` is true (matches the editor's
+// GLTFModel/FBXModel: static unless playing, honouring loop/speed).
 function setupClips(obj, model, clips) {
   if (!clips || clips.length === 0) return;
-  const a = obj.animation;
-  if (!a || a.playing !== true) return; // matches editor: static unless playing
-
-  const named = clips.map((c, i) => ({ clip: c, name: c.name || `Clip ${i + 1}` }));
-  const chosen = (a.activeClip && named.find((n) => n.name === a.activeClip)?.clip) || clips[0];
 
   const mixer = new THREE.AnimationMixer(model);
-  const action = mixer.clipAction(chosen);
-  action.setLoop(a.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
-  action.clampWhenFinished = a.loop === false;
-  action.reset().play();
-  mixers.push({ mixer, speed: a.speed ?? 1 });
+  const map = new Map();
+  clips.forEach((c, i) => map.set(c.name || `Clip ${i + 1}`, c));
+  const entry = { mixer, clips: map, active: null, activeName: null };
+  clipRegistry.set(obj.id, entry);
+  mixers.push({ mixer, speed: 1 }); // per-action speed handled via timeScale
+
+  const a = obj.animation;
+  if (a && a.playing === true) {
+    const chosenName = (a.activeClip && map.has(a.activeClip)) ? a.activeClip : map.keys().next().value;
+    const action = mixer.clipAction(map.get(chosenName));
+    action.setLoop(a.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+    action.clampWhenFinished = a.loop === false;
+    action.timeScale = a.speed ?? 1;
+    action.reset().play();
+    entry.active = action;
+    entry.activeName = chosenName;
+  }
 }
 
 function loadModel(obj, parent, placeholder, materialRegistry) {
@@ -518,6 +549,8 @@ async function main() {
   if ((env.ambientIntensity ?? 0) > 0) {
     scene.add(new THREE.AmbientLight(0xffffff, env.ambientIntensity));
   }
+  // Hemisphere fill — matches the editor's <hemisphereLight intensity 0.3>.
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x0a0a0a, 0.3));
 
   // Load the same HDRI that Drei uses in the editor
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -587,6 +620,18 @@ async function main() {
   // ── Postprocessing ──────────────────────────────────────────────────────────
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
+
+  // Ambient occlusion — the editor renders N8AO at intensity 3 by default, which
+  // darkens contact areas and gives the scene depth. Without it the export looks
+  // flat, bright and washed out, so approximate it with SSAOPass.
+  if (rs.ssao !== false) {
+    const ssao = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+    ssao.kernelRadius = 12;
+    ssao.minDistance = 0.002;
+    ssao.maxDistance = 0.12;
+    composer.addPass(ssao);
+  }
+
   if (rs.bloom !== false) {
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -615,6 +660,26 @@ async function main() {
   const overlay = addOverlay();
   overlay.setArmed(hasWeapon);
   overlay.setHud(hasWeapon && damageTargets.length ? `Targets 0/${damageTargets.length}` : "");
+
+  // ── Enemy AI + shooting-gallery bob (mirrors PlayController) ────────────────
+  const collectByComponent = (list, type, out = []) => {
+    for (const o of list ?? []) {
+      if (o.components?.some((c) => c.type === type)) out.push(o);
+      collectByComponent(o.children, type, out);
+    }
+    return out;
+  };
+  // EnemyAI objects chase the player and play their "Walk" clip while moving.
+  const enemies = collectByComponent(sceneData.objects, "EnemyAI")
+    .map((o) => ({ id: o.id, node: objectById.get(o.id), speed: getComponent(o, "EnemyAI")?.speed ?? 4 }))
+    .filter((e) => e.node);
+  // Health targets that are NOT enemies gently bob in place, like the editor.
+  const galleryBob = collectByComponent(sceneData.objects, "Health")
+    .filter((o) => !o.components.some((c) => c.type === "EnemyAI"))
+    .map((o, i) => { const node = objectById.get(o.id); return node ? { node, baseY: node.position.y, phase: i * 1.3 } : null; })
+    .filter(Boolean);
+  const _enemyDir = new THREE.Vector3();
+  const _zAxis = new THREE.Vector3(0, 0, 1);
 
   // Third-person mode: PlayerController present but no Camera component on the player.
   // WASD moves the player; orbit controls orbit around them.
@@ -849,6 +914,26 @@ async function main() {
         else if (axisIdx === 1) g.scale.set(bx, by * delta, bz);
         else g.scale.set(bx, by, bz * delta);
       }
+    }
+
+    // ── Enemy AI: chase the player and play the "Walk" clip while moving ───────
+    if (playerNode) {
+      for (const e of enemies) {
+        if (!e.node.visible) continue;
+        _enemyDir.subVectors(playerNode.position, e.node.position);
+        _enemyDir.y = 0;
+        const dist = _enemyDir.length();
+        if (dist > 1.2) {
+          _enemyDir.normalize();
+          e.node.position.addScaledVector(_enemyDir, e.speed * dt);
+          e.node.quaternion.setFromUnitVectors(_zAxis, _enemyDir);
+          playClipById(e.id, "Walk");
+        }
+      }
+    }
+    // Shooting-gallery targets bob in place.
+    for (const g of galleryBob) {
+      g.node.position.y = g.baseY + Math.sin(scriptTime * 2 + g.phase) * 0.3;
     }
 
     // ── User scripts ─────────────────────────────────────────────────────────
